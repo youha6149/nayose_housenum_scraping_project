@@ -1,0 +1,11 @@
+.venv
+.mypy_cache
+others/*
+config.ini
+*.log
+__pycache__/
+*.pyc
+src/log/bot_log
+project.egg-info
+build
+csv

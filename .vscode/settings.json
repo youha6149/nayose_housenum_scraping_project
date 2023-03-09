@@ -1,0 +1,28 @@
+{
+    "[python]": {
+        // ファイル保存時にフォーマット
+        // タブサイズは 4
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+    "editor.formatOnSave": true,
+    "python.formatting.provider": "none",
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--ignore=E203, E501, W503",
+        "--max-complexity=10",
+    ],
+    "python.linting.flake8Path": "${workspaceFolder}\\.venv\\Scripts\\flake8.exe",
+    "python.linting.mypyEnabled": true,
+    "python.linting.mypyPath": "${workspaceFolder}\\.venv\\Scripts\\mypy.exe",
+    "python.linting.banditEnabled": true,
+    "python.linting.banditPath": "${workspaceFolder}\\.venv\\Scripts\\bandit.exe",
+}
