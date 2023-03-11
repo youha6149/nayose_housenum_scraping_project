@@ -14,17 +14,19 @@ class SuumoScraper(Scraper):
         self.liblary_url = "https://suumo.jp/library/search/ichiran.html?qr="
         self.row_data = []
 
-    def get_table_links(self, selector):
+    def __get_table_links(self, selector):
         soup = BeautifulSoup(self.page_source, "lxml")
         links = [a["href"] for a in soup.select(selector=selector)]
         return links
 
-    def filtering_condition(self, conditions: SuumoConditions):
+    def __filtering_condition(self, conditions: SuumoConditions):
         self.find_element(By.CSS_SELECTOR, "a[title='条件を追加・変更する']").click()
         self.waitng.until(lambda x: self.page_is_loaded())
 
         xpath_str_dict = conditions.linked_element_dict()
         for k, v in conditions.to_dict().items():
+            if k == "property_name":
+                continue
             if v:
                 xpath_string = f"//li[contains(.//{xpath_str_dict[k]['tag']}, '{v}')]{xpath_str_dict[k]['to_input']}"
                 self.find_element(
@@ -35,7 +37,7 @@ class SuumoScraper(Scraper):
         self.find_element(By.ID, "bottomSubmit").click()
         self.waitng.until(lambda x: self.page_is_loaded())
 
-    def scrape_contents(self):
+    def __scrape_contents(self):
         soup = BeautifulSoup(self.page_source, "lxml")
         row_dict = {"物件名": soup.find("h1").text}
 
@@ -51,9 +53,9 @@ class SuumoScraper(Scraper):
 
     def scrape_suumo(self, conditions: SuumoConditions):
         self.open_page(url=f"{self.liblary_url}{conditions.property_name}")
-        self.filtering_condition(conditions)
-        links = self.get_table_links("#contents > table > tbody > tr > td > div > a")
+        self.__filtering_condition(conditions)
+        links = self.__get_table_links("#contents > table > tbody > tr > td > div > a")
 
         for link in links:
-            self.open_page(f"{self.liblary_url}{link}")
-            self.scrape_contents()
+            self.open_page(url=f"{self.base_url}{link}")
+            self.__scrape_contents()
