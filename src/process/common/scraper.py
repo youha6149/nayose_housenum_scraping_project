@@ -33,18 +33,6 @@ class Scraper(webdriver.Chrome):
         time.sleep(2)
         return is_loaded
 
-    def land_first_page(self, url):
+    def open_page(self, url):
         self.get(url)
         self.waitng.until(lambda x: self.page_is_loaded())
-
-    def get_data_by_find(self, soup: BeautifulSoup = "", **kwargs):
-        if not soup:
-            soup = BeautifulSoup(self.page_source, "lxml")
-        data = soup.find_all(**kwargs)
-        return data
-
-    def get_data_by_selector(self, selector, soup: BeautifulSoup = ""):
-        if not soup:
-            soup = BeautifulSoup(self.page_source, "lxml")
-        data = soup.select(selector=selector)
-        return data
