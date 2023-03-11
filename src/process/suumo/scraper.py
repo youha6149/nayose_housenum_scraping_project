@@ -10,17 +10,15 @@ from process.suumo.conditions import SuumoConditions
 class SuumoScraper(Scraper):
     def __init__(self, default_dl_path="", is_headless=False):
         super().__init__(default_dl_path, is_headless)
+        self.base_url = "https://suumo.jp/library/search/ichiran.html?qr="
         self.row_data = []
 
     def get_table_links(self, selector):
         soup = BeautifulSoup(self.page_source, "lxml")
-        authors = soup.select(selector=selector)
-        links = [a["href"] for a in authors]
+        links = [a["href"] for a in soup.select(selector=selector)]
         return links
 
-    # 絞り込みを行う処理を作成する
     def filtering_condition(self, conditions: SuumoConditions):
-        pdb.set_trace()
         self.find_element(By.CSS_SELECTOR, "a[title='条件を追加・変更する']").click()
         self.waitng.until(lambda x: self.page_is_loaded())
 
@@ -38,11 +36,14 @@ class SuumoScraper(Scraper):
 
     def scrape_contents(self):
         soup = BeautifulSoup(self.page_source, "lxml")
-        row_dict = {"物件名", soup.find("h1")}
+        row_dict = {"物件名": soup.find("h1").text}
 
-        trs = soup.select("#contents > div > div > div > table > tr")
+        trs = soup.select("#contents > div > div > div > table > tbody > tr")
         for tr in trs:
             # {"住所": "北海道 函館市 湯川町３"}
-            row_dict.update(dict(zip(tr.find_all("th"), tr.find_all("td"))))
+            th_texts = [th.text for th in tr.find_all("th")]
+            td_texts = [td.text for td in tr.find_all("td")]
+            zip_texts = zip(th_texts, td_texts)
+            row_dict.update(dict(zip_texts))
 
-        self.row_data.append()
+        self.row_data.append(row_dict)
