@@ -10,7 +10,8 @@ from process.suumo.conditions import SuumoConditions
 class SuumoScraper(Scraper):
     def __init__(self, default_dl_path="", is_headless=False):
         super().__init__(default_dl_path, is_headless)
-        self.base_url = "https://suumo.jp/library/search/ichiran.html?qr="
+        self.base_url = "https://suumo.jp"
+        self.liblary_url = "https://suumo.jp/library/search/ichiran.html?qr="
         self.row_data = []
 
     def get_table_links(self, selector):
@@ -47,3 +48,12 @@ class SuumoScraper(Scraper):
             row_dict.update(dict(zip_texts))
 
         self.row_data.append(row_dict)
+
+    def scrape_suumo(self, conditions: SuumoConditions):
+        self.open_page(url=f"{self.liblary_url}{conditions.property_name}")
+        self.filtering_condition(conditions)
+        links = self.get_table_links("#contents > table > tbody > tr > td > div > a")
+
+        for link in links:
+            self.open_page(f"{self.liblary_url}{link}")
+            self.scrape_contents()
