@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass
 
 @dataclass
 class SuumoConditions:
+    property_name: str = ""
     prefecture: str = ""
     time_walk: str = ""
     year_passed: str = ""
