@@ -5,9 +5,10 @@ from dataclasses import asdict, dataclass
 class SuumoConditions:
     property_name: str = ""
     prefecture: str = ""
+    city: str = ""
     time_walk: str | int = ""
     year_passed: str = ""
-    property_kind: str = "賃貸"
+    property_kind: str = ""
 
     def to_dict(self):
         return asdict(self)
