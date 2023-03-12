@@ -27,7 +27,7 @@ class SuumoScraper(Scraper):
 
         xpath_str_dict = conditions.linked_element_dict()
         for k, v in conditions.to_dict().items():
-            if k == "property_name":
+            if k == "property_name" or k == "prefecture" or k == "city":
                 continue
             if v:
                 # 選択する値が誤っていてもそのまま処理を続ける
@@ -59,8 +59,13 @@ class SuumoScraper(Scraper):
         self.row_data.append(row_dict)
 
     def scrape_suumo(self, conditions: SuumoConditions):
-        self.open_page(url=f"{self.liblary_url}{conditions.property_name}")
-        self.__filtering_condition(conditions)
+        # TODO:urlで直接物件名・住所を入力した方が良い
+        self.open_page(
+            url=f"{self.liblary_url}{conditions.property_name}+{conditions.prefecture}+{conditions.city}"
+        )
+        # MEMO:とりあえずキーワード検索でどの程度取得できるか確認してみて、精度が低かったら条件追加も行う方向性
+        # self.__filtering_condition(conditions)
+
         links = self.__get_table_links("#contents > table > tbody > tr > td > div > a")
         # 該当するデータが一つもない場合、returnする
         if not links:
