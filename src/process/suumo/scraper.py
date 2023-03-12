@@ -1,6 +1,8 @@
 import pdb
+import traceback
 
 from bs4 import BeautifulSoup
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from process.common.scraper import Scraper
@@ -14,7 +16,7 @@ class SuumoScraper(Scraper):
         self.liblary_url = "https://suumo.jp/library/search/ichiran.html?qr="
         self.row_data = []
 
-    def __get_table_links(self, selector):
+    def __get_table_links(self, selector: str):
         soup = BeautifulSoup(self.page_source, "lxml")
         links = [a["href"] for a in soup.select(selector=selector)]
         return links
@@ -28,11 +30,16 @@ class SuumoScraper(Scraper):
             if k == "property_name":
                 continue
             if v:
-                xpath_string = f"//li[contains(.//{xpath_str_dict[k]['tag']}, '{v}')]{xpath_str_dict[k]['to_input']}"
-                self.find_element(
-                    By.XPATH,
-                    xpath_string,
-                ).click()
+                # 選択する値が誤っていてもそのまま処理を続ける
+                try:
+                    xpath_string = f"//li[contains(.//{xpath_str_dict[k]['tag']}, '{v}')]{xpath_str_dict[k]['to_input']}"
+                    self.find_element(
+                        By.XPATH,
+                        xpath_string,
+                    ).click()
+                except NoSuchElementException as e:
+                    self.__add_element_error_detail(e)
+                    continue
 
         self.find_element(By.ID, "bottomSubmit").click()
         self.waitng.until(lambda x: self.page_is_loaded())
@@ -55,6 +62,9 @@ class SuumoScraper(Scraper):
         self.open_page(url=f"{self.liblary_url}{conditions.property_name}")
         self.__filtering_condition(conditions)
         links = self.__get_table_links("#contents > table > tbody > tr > td > div > a")
+        # 該当するデータが一つもない場合、returnする
+        if not links:
+            return "not links"
 
         for link in links:
             self.open_page(url=f"{self.base_url}{link}")
