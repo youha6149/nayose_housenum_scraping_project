@@ -43,7 +43,7 @@ class Scraper(webdriver.Chrome):
 
     def page_is_loaded(self):
         is_loaded = self.execute_script("return document.readyState") == "complete"
-        time.sleep(2)
+        time.sleep(3)
         return is_loaded
 
     def open_page(self, url):
