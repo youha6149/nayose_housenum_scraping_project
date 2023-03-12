@@ -6,12 +6,19 @@ from process.suumo.scraper import SuumoScraper
 
 
 def test_suumo_scraping():
-    property_names = ["アルス品川", "ライオンズマンション"]
+    property_names = ["ジーメゾン西大宮", "ＤーＲＯＯＭ西大宮ＰＪ北棟", "エレガンテ"]
+    prefectures = ["埼玉県", "埼玉県", "埼玉県"]
+    cities = ["さいたま市西区", "さいたま市西区", "さいたま市西区"]
+
     # 以下をまとめて関数として定義する
     with SuumoScraper() as bot:
         pdb.set_trace()
-        for name in property_names:
-            conditions = SuumoConditions(property_name=name, prefecture="東京都")
+        for i in range(len(property_names)):
+            conditions = SuumoConditions(
+                property_name=property_names[i],
+                prefecture=prefectures[i],
+                city=cities[i],
+            )
             if not conditions.time_walk == "":
                 conditions.trans_raw_time_walk()
             try:
