@@ -1,14 +1,18 @@
 import os
 
 import pandas as pd
-from setting import Base, get_nayose_db, nayose_engine
 from sqlalchemy import Column, Integer, String
+
+if not __name__ == "__main__":
+    from model.setting import Base, nayose_engine
+else:
+    from setting import Base, nayose_engine
 
 
 class Nayose(Base):
     __tablename__ = "nayose"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     reid = Column(Integer)
     name = Column(String)
     address = Column(String)
@@ -18,14 +22,16 @@ class Nayose(Base):
     timewalk = Column(Integer)
     housenum = Column(Integer)
 
+    @classmethod
+    def _init_data(cls):
+        nayose_df = pd.read_csv(f"{os.getcwd()}/src/csv/nayose_raw - raw (1).csv")
+        nayose_df["id"] = nayose_df.index
+        nayose_trans_df = nayose_df[[k for k in vars(cls) if not k.startswith("_")]]
 
-def insert_nayose_data():
-    nayose_df = pd.read_csv(f"{os.getcwd()}/src/raw/nayose_raw - raw.csv")
-    nayose_trans_df = nayose_df[
-        [k for k in Nayose.__dict__.keys() if not k.startswith("_") and not k == "id"]
-    ]
-    nayose_trans_df.to_sql("nayose", nayose_engine)
+        nayose_trans_df.to_sql(
+            cls.__tablename__, nayose_engine, index=False, if_exists="replace"
+        )
 
 
 if __name__ == "__main__":
-    insert_nayose_data()
+    Nayose._init_data()
