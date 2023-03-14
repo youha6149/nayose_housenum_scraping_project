@@ -9,3 +9,4 @@ src/log/bot_log
 project.egg-info
 build
 csv
+db
