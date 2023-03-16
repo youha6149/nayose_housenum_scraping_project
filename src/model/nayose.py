@@ -32,6 +32,9 @@ class Nayose(Base):
             cls.__tablename__, nayose_engine, index=False, if_exists="replace"
         )
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 if __name__ == "__main__":
     Nayose._init_data()
