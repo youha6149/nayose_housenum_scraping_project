@@ -1,18 +1,11 @@
-import pdb
 import re
-import time
-import traceback
 
 from bs4 import BeautifulSoup
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 
 from model.nayose import Nayose
 from process.common.scraper import Scraper
-
-# TODO:wait処理をcss_selectorとしてcommonクラスにまとめる
 
 
 class HomemateScraper(Scraper):
@@ -41,10 +34,7 @@ class HomemateScraper(Scraper):
                 return
 
             select_element.select_by_visible_text(pref)
-            self.waitng.until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "#beacon img"))
-            )
-            time.sleep(1)
+            self.wait_presence_of_element_by_cssselector("#beacon img", 1)
 
             # 変化したHTMLを再度取得する
             soup = BeautifulSoup(self.page_source, "lxml")
@@ -85,10 +75,7 @@ class HomemateScraper(Scraper):
         # 検索ボックスから検索
         self.open_page(f"{self.liblary_url}{record.name}/")
         # 該当物件がないとエラーになる
-        self.waitng.until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "#beacon img"))
-        )
-        time.sleep(1)
+        self.wait_presence_of_element_by_cssselector("#beacon img", 1)
 
         # 表示された情報を取得する
         links = self.__get_table_links(record)
@@ -99,8 +86,5 @@ class HomemateScraper(Scraper):
 
         for link in links:
             self.open_page(url=f"{self.base_url}{link}")
-            self.waitng.until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "#beacon img"))
-            )
-            time.sleep(1)
+            self.wait_presence_of_element_by_cssselector("#beacon img", 1)
             self.__scrape_contents(record)
