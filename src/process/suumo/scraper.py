@@ -1,10 +1,8 @@
-import pdb
-import traceback
-
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
+from model.nayose import Nayose
 from process.common.scraper import Scraper
 from process.suumo.conditions import SuumoConditions
 
@@ -16,9 +14,12 @@ class SuumoScraper(Scraper):
         self.liblary_url = "https://suumo.jp/library/search/ichiran.html?qr="
         self.row_data = []
 
-    def __get_table_links(self, selector: str):
+    def __get_table_links(self):
         soup = BeautifulSoup(self.page_source, "lxml")
-        links = [a["href"] for a in soup.select(selector=selector)]
+        links = [
+            a["href"]
+            for a in soup.select("#contents > table > tbody > tr > td > div > a")
+        ]
         return links
 
     def __filtering_condition(self, conditions: SuumoConditions):
@@ -58,15 +59,14 @@ class SuumoScraper(Scraper):
 
         self.row_data.append(row_dict)
 
-    def scrape_suumo(self, conditions: SuumoConditions):
-        # TODO:urlで直接物件名・住所を入力した方が良い
+    def scrape_suumo(self, record: Nayose):
         self.open_page(
-            url=f"{self.liblary_url}{conditions.property_name}+{conditions.prefecture}+{conditions.city}"
+            url=f"{self.liblary_url}{record.name}+{record.prefecture}+{record.city}"
         )
         # MEMO:とりあえずキーワード検索でどの程度取得できるか確認してみて、精度が低かったら条件追加も行う方向性
         # self.__filtering_condition(conditions)
 
-        links = self.__get_table_links("#contents > table > tbody > tr > td > div > a")
+        links = self.__get_table_links()
         # 該当するデータが一つもない場合、returnする
         if not links:
             return "not links"
