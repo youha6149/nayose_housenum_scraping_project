@@ -1,5 +1,6 @@
 import pdb
 import re
+import time
 import traceback
 
 from bs4 import BeautifulSoup
@@ -41,8 +42,9 @@ class HomemateScraper(Scraper):
 
             select_element.select_by_visible_text(pref)
             self.waitng.until(
-                EC.presence_of_element_located((By.ID, "deqwas-collection"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#beacon img"))
             )
+            time.sleep(1)
 
             # 変化したHTMLを再度取得する
             soup = BeautifulSoup(self.page_source, "lxml")
@@ -77,13 +79,16 @@ class HomemateScraper(Scraper):
             )
             for d in data_element
         }
-        pdb.set_trace()
         self.row_data.append(property_dict)
 
     def scrape_homemate(self, record: Nayose):
         # 検索ボックスから検索
         self.open_page(f"{self.liblary_url}{record.name}/")
-        self.waitng.until(EC.presence_of_element_located((By.ID, "deqwas-collection")))
+        # 該当物件がないとエラーになる
+        self.waitng.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#beacon img"))
+        )
+        time.sleep(1)
 
         # 表示された情報を取得する
         links = self.__get_table_links(record)
@@ -91,10 +96,11 @@ class HomemateScraper(Scraper):
         # 該当するデータが一つもない場合、returnする
         if not links:
             return "not links"
-        pdb.set_trace()
+
         for link in links:
             self.open_page(url=f"{self.base_url}{link}")
             self.waitng.until(
-                EC.presence_of_element_located((By.ID, "deqwas-collection"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#beacon img"))
             )
+            time.sleep(1)
             self.__scrape_contents(record)
