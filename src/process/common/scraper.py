@@ -6,6 +6,8 @@ import traceback
 import pandas as pd
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -60,3 +62,7 @@ class Scraper(webdriver.Chrome):
             "function_name": tb[-1].name,
         }
         self.error_elements_exc.append(error_dict)
+
+    def wait_presence_of_element_by_cssselector(self, selector: str, waittime: int):
+        self.waitng.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+        time.sleep(waittime)
