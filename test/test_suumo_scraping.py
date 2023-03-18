@@ -19,7 +19,7 @@ def test_suumo_scraping():
                 print(i)
                 record = housenum0_record[i]
                 bot.scrape_suumo(record)
-                print(bot.row_data)
+
         except Exception as e:
             logger = setup_logger("Scraper_logger", "scraper_error.log")
             logger.error(f"An error occurred: {e}")
