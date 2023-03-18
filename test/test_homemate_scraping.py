@@ -1,4 +1,5 @@
 import pdb
+import time
 
 from model.nayose import Nayose
 from model.setting import get_nayose_db
@@ -11,13 +12,17 @@ def test_unit_homemate_read_nayose():
     housenum0_record = session.query(Nayose).filter_by(housenum=0).all()
 
     with HomemateScraper() as bot:
-        for i in range(39, 49):
-            pdb.set_trace()
-            print(i)
-            record = housenum0_record[i]
+        try:
+            for i in range(39, 49):
 
-            bot.scrape_homemate(record)
-        print(bot.row_data)
+                print(i)
+                record = housenum0_record[i]
+
+                bot.scrape_homemate(record)
+            print(bot.row_data)
+        except Exception as e:
+            pdb.set_trace()
+            print(e)
 
 
 if __name__ == "__main__":
