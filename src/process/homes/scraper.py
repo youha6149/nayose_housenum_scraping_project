@@ -1,4 +1,6 @@
+import itertools
 import pdb
+import re
 import time
 import traceback
 
@@ -7,8 +9,9 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
+# from process.homes.conditions import HomesConditions
+from model.nayose import Nayose
 from process.common.scraper import Scraper
-from process.homes.conditions import HomesConditions
 
 
 # MEMO:とりあえずキーワード検索から探す。
@@ -22,18 +25,35 @@ class HomesScraper(Scraper):
         self.liblary_url = "https://www.homes.co.jp/archive/list/search/?keyword="
         self.row_data = []
 
-    def __get_table_links(self, conditions: HomesConditions):
+    def get_table_links(self, record: Nayose):
         soup = BeautifulSoup(self.page_source, "lxml")
-        pdb.set_trace()
 
         total_num = int(soup.find("span", {"class": "totalNum"}).text)
         if total_num > 20:
             select_box = Select(self.find_element(By.ID, "cond_walkminutes"))
-            select_box.select_by_visible_text(conditions.time_walk)
+            w_t = record.timewalk
+            if type(w_t) == "str":
+                return
+
+            # 名寄せデータ上のtimewalkが正確かわからないため、
+            # w_tの適切な徒歩分数範囲(例：timewalk=3なら"7分以内")より１ランク上のものを適用している
+            if w_t <= 1:
+                record.timewalk = "5分以内"
+            elif w_t <= 5:
+                record.timewalk = "7分以内"
+            elif w_t <= 7:
+                record.timewalk = "10分以内"
+            elif w_t <= 10:
+                record.timewalk = "15分以内"
+            elif w_t <= 20:
+                record.timewalk = "20分以内"
+            else:
+                record.timewalk = ""
+
+            select_box.select_by_visible_text(record.timewalk)
 
         property_lists = soup.find_all("div", class_="mod-building ui-frame-base")
-        address = f"{conditions.prefecture}{conditions.city}"
-
+        address = f"{record.prefecture}{record.city}"
         links = [
             l.select_one("h2 > a").get("href")
             for l in property_lists
@@ -45,24 +65,22 @@ class HomesScraper(Scraper):
     def scrape_table_data(self):
         soup = BeautifulSoup(self.page_source, "lxml")
         pdb.set_trace()
-        div = soup.find("div", class_="p-bukkenDetailinfo")
-        h2 = div.find("h2", class_="mod-headingText", text="物件概要")
-        table = h2.find_next_sibling("table", class_="mod-tableVertical")
+        spec_tables = soup.find_all("table", class_="mod-tableVertical")
 
-    def scrape_homes(self, conditions: HomesConditions):
-        self.open_page(f"{self.liblary_url}{conditions.name}")
-        # まず何件あるか確認する　→ 件数が20以上の場合、絞り込みを行う
-        # → 基本的には徒歩分数
-        # Homesの徒歩分数とデータ上の徒歩分数が違う場合どうするか？
-        # それを見越してデータの徒歩分数範囲より一つ大きい範囲を設定に加えるか
-        pdb.set_trace()
-        conditions.trans_raw_time_walk()
-        links = self.__get_table_links(conditions)
+        ths = [
+            [th.contents[0].strip() for th in tbl.find_all("th")] for tbl in spec_tables
+        ]
+        # [['所在地', '交通'], ['物件種別', '築年月（築年数）', '建物構造', '建物階建', '総戸数'], ['設備・条件']]
 
-        for link in links:
-            self.open_page(f"{self.base_url}{link}")
-            time.sleep(3)
-            self.scrape_table_data()
-            # TODO:tableデータの取得処理を作成する
-            # TODO:ブロックがかかってしまうので一旦終了
-            # mod-tableVertical
+        tds = [[td.text for td in tbl.find_all("td")] for tbl in spec_tables]
+
+        tds[0][0] = tds[0][0].split("\n")[1]
+        tds[0][1] = ",".join([t for t in tds[0][1].split("\n") if not t == ""])
+        tds = [[t.strip() for t in td] for td in tds]
+
+        property_dict_in_list = [dict(zip(th, td)) for th, td in zip(ths, tds)]
+        merge_dict = {}
+        for d in property_dict_in_list:
+            merge_dict.update(d)
+
+        self.row_data.append(merge_dict)
