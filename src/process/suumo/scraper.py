@@ -15,11 +15,10 @@ class SuumoScraper(Scraper):
         self.row_data = []
 
     def __get_table_links(self):
-        soup = BeautifulSoup(self.page_source, "lxml")
-        links = [
-            a["href"]
-            for a in soup.select("#contents > table > tbody > tr > td > div > a")
-        ]
+        result_boxes = self.get_elements_by_select(
+            "#contents > table > tbody > tr > td > div > a"
+        )
+        links = [a["href"] for a in result_boxes]
         return links
 
     def __filtering_condition(self, conditions: SuumoConditions):
@@ -46,10 +45,10 @@ class SuumoScraper(Scraper):
         self.waitng.until(lambda x: self.page_is_loaded())
 
     def __scrape_contents(self):
-        soup = BeautifulSoup(self.page_source, "lxml")
-        row_dict = {"物件名": soup.find("h1").text}
-
-        trs = soup.select("#contents > div > div > div > table > tbody > tr")
+        trs = self.get_elements_by_select(
+            "#contents > div > div > div > table > tbody > tr"
+        )
+        row_dict = {"物件名": self.soup.find("h1").text}
         for tr in trs:
             # {"住所": "北海道 函館市 湯川町３"}
             th_texts = [th.text for th in tr.find_all("th")]
