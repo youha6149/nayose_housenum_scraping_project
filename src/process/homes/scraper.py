@@ -1,11 +1,3 @@
-import itertools
-import pdb
-import re
-import time
-import traceback
-
-from bs4 import BeautifulSoup, NavigableString, ResultSet, Tag
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
@@ -19,21 +11,6 @@ class HomesScraper(Scraper):
         self.base_url = "https://www.homes.co.jp"
         self.liblary_url = "https://www.homes.co.jp/archive/list/search/?keyword="
         self.row_data = []
-        self.page_soup = ""
-
-    def get_element_by_find(self, tag, **attr) -> Tag | NavigableString | None:
-        """page_sourseから要素取得を行う。主にページ更新後の最初の要素取得で用いる"""
-        soup = BeautifulSoup(self.page_source, "lxml")
-        self.page_soup = soup
-        element = soup.find(tag, **attr)
-        return element
-
-    def get_elements_by_find_all(self, tag, **attr) -> ResultSet:
-        """page_sourseから複数の要素取得を行う。主にページ更新後の最初の要素取得で用いる"""
-        soup = BeautifulSoup(self.page_source, "lxml")
-        self.page_soup = soup
-        elements = soup.find_all(tag, **attr)
-        return elements
 
     def filtering_timewalk(self, timewalk: int):
         select_box = Select(self.find_element(By.ID, "cond_walkminutes"))
