@@ -32,7 +32,7 @@ class Scraper(webdriver.Chrome):
         self.waitng = WebDriverWait(self, 15)
         self.error_elements_exc: list[dict[str, str]] = []
         self.media_dict = {"media": type(self).__name__}
-        self.page_soup = ""
+        self.soup = ""
 
     def __exit__(self, exc_type, exc, traceback):
         if self.error_elements_exc:
@@ -69,16 +69,42 @@ class Scraper(webdriver.Chrome):
         self.waitng.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
         time.sleep(waittime)
 
-    def get_element_by_find(self, tag, **attr) -> Tag | NavigableString | None:
-        """page_sourseから要素取得を行う。主にページ更新後の最初の要素取得で用いる"""
-        soup = BeautifulSoup(self.page_source, "lxml")
-        self.page_soup = soup
-        element = soup.find(tag, **attr)
+    def _init_src_element(self, src: Tag = "") -> Tag | BeautifulSoup:
+        if not src == "":
+            return src
+
+        self.soup = BeautifulSoup(self.page_source, "lxml")
+
+        return self.soup
+
+    def get_element_by_find(self, tag, src="", **attr) -> Tag | NavigableString:
+        """.findを用いて要素取得を行う。要素がない場合NoSuchElementExceptionを返す"""
+        src_elm = self._init_src_element(src)
+        element = src_elm.find(tag, **attr)
+        if element is None:
+            raise NoSuchElementException
         return element
 
-    def get_elements_by_find_all(self, tag, **attr) -> ResultSet:
-        """page_sourseから複数の要素取得を行う。主にページ更新後の最初の要素取得で用いる"""
-        soup = BeautifulSoup(self.page_source, "lxml")
-        self.page_soup = soup
-        elements = soup.find_all(tag, **attr)
+    def get_elements_by_find_all(self, tag, src="", **attr) -> ResultSet:
+        """.find_allを用いて複数の要素取得を行う。要素がない場合NoSuchElementExceptionを返す"""
+        src_elm = self._init_src_element(src)
+        elements = src_elm.find_all(tag, **attr)
+        if elements is None:
+            raise NoSuchElementException
+        return elements
+
+    def get_element_by_select_one(self, selector, src="") -> Tag:
+        """.select_oneを用いて要素取得を行う。要素がない場合NoSuchElementExceptionを返す"""
+        src_elm = self._init_src_element(src)
+        elements = src_elm.select_one(selector)
+        if elements is None:
+            raise NoSuchElementException
+        return elements
+
+    def get_elements_by_select(self, selector, src="") -> ResultSet[Tag]:
+        """.selectを用いて複数の要素取得を行う。要素がない場合NoSuchElementExceptionを返す"""
+        src_elm = self._init_src_element(src)
+        elements = src_elm.select(selector)
+        if elements is None:
+            raise NoSuchElementException
         return elements
