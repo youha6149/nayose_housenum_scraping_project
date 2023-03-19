@@ -4,20 +4,15 @@ import re
 import time
 import traceback
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
-# from process.homes.conditions import HomesConditions
 from model.nayose import Nayose
 from process.common.scraper import Scraper
 
 
-# MEMO:とりあえずキーワード検索から探す。
-# 複数ページにまたがる場合、全てのページから住所等の情報が似ているものを抽出する
-# 築年月は名寄せrawの対象データが更新された時期によって変化する可能性があるので、使えない
-# 専有面積と間取りもデータが存在しない場合があるため、使うにしても工夫が必要
 class HomesScraper(Scraper):
     def __init__(self, default_dl_path="", is_headless=False):
         super().__init__(default_dl_path, is_headless)
@@ -25,11 +20,22 @@ class HomesScraper(Scraper):
         self.liblary_url = "https://www.homes.co.jp/archive/list/search/?keyword="
         self.row_data = []
 
-    def get_table_links(self, record: Nayose):
+    # TODO:total_num_element取得処理は共通処理に移動させる
+    def get_total_num(self, tag, **attr) -> Tag | NavigableString | None:
         soup = BeautifulSoup(self.page_source, "lxml")
+        total_num_element = soup.find(tag, **attr)
+        soup.find(tag="span", class_="totalNum")
+        return total_num_element
 
-        total_num = int(soup.find("span", {"class": "totalNum"}).text)
-        if total_num > 20:
+    def get_table_links(self, record: Nayose):
+        attr = {"class_": "totalNum"}
+        total_num_element = self.get_total_num("span", **attr)
+        if total_num_element is None:
+            return
+
+        # 1物件に収まる物件数の最大値が20件
+        # それを超えたら絞り込みを行う
+        if int(total_num_element.text) > 20:
             select_box = Select(self.find_element(By.ID, "cond_walkminutes"))
             w_t = record.timewalk
             if type(w_t) == "str":
@@ -51,7 +57,16 @@ class HomesScraper(Scraper):
                 record.timewalk = ""
 
             select_box.select_by_visible_text(record.timewalk)
+            self.waitng.until(lambda x: self.page_is_loaded())
 
+            # DOMが変わるので再度total_num_elementを取得
+            total_num_element = total_num_element = self.get_total_num("span", **attr)
+            # 絞り込んでもなお20件を超える場合、エラーデータの可能性あり
+            if int(total_num_element.text) > 20:
+                return
+
+        # 所在地にnayoseデータの都道府県名+市区町村名が入っているもののみ取得
+        soup = BeautifulSoup(self.page_source, "lxml")
         property_lists = soup.find_all("div", class_="mod-building ui-frame-base")
         address = f"{record.prefecture}{record.city}"
         links = [
@@ -64,7 +79,6 @@ class HomesScraper(Scraper):
 
     def scrape_table_data(self):
         soup = BeautifulSoup(self.page_source, "lxml")
-        pdb.set_trace()
         spec_tables = soup.find_all("table", class_="mod-tableVertical")
 
         ths = [
