@@ -21,8 +21,6 @@ class HomesScraper(Scraper):
         self.row_data = []
         self.page_soup = ""
 
-    # TODO:total_num_element取得処理は共通処理に移動させる
-    # これをするなら、単一の要素取得は全てこれでいいのでは？
     def get_element_by_find(self, tag, **attr) -> Tag | NavigableString | None:
         """page_sourseから要素取得を行う。主にページ更新後の最初の要素取得で用いる"""
         soup = BeautifulSoup(self.page_source, "lxml")
@@ -40,7 +38,6 @@ class HomesScraper(Scraper):
     def filtering_timewalk(self, timewalk: int):
         select_box = Select(self.find_element(By.ID, "cond_walkminutes"))
 
-        # 名寄せデータ上のtimewalkが正確かわからないため、
         # timewalkの適切な徒歩分数範囲(例：timewalk=3なら"7分以内")より１ランク上のものを適用している
         if timewalk <= 1:
             timewalk = "5分以内"
@@ -55,22 +52,20 @@ class HomesScraper(Scraper):
         else:
             timewalk = ""
 
-        select_box.select_by_visible_text(timewalk)
+        if not timewalk == "":
+            select_box.select_by_visible_text(timewalk)
         self.waitng.until(lambda x: self.page_is_loaded())
 
     def get_table_links(self, record: Nayose) -> list | None:
-
         total_num_element = self.get_element_by_find("span", class_="totalNum")
         if total_num_element is None:
             return
 
-        # 1物件に収まる物件数の最大値である20件を超えたら絞り込みを行う
+        # 次ページへ行くとブロックされるので絞り込みを行う(20=最大表示件数)
         if int(total_num_element.text) > 20:
-            # filteringメソッドとして定義する
             self.filtering_timewalk(record.timewalk)
 
             # DOMが変わるので再度total_num_elementを取得
-            # 絞り込んでもなお20件を超える場合、エラーデータの可能性あり
             total_num_element = self.get_element_by_find("span", class_="totalNum")
             if int(total_num_element.text) > 20:
                 return
