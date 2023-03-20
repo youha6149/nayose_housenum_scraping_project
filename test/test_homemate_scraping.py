@@ -21,7 +21,7 @@ def test_unit_homemate_read_nayose():
                 bot.scrape_homemate(record)
             print(bot.row_data)
         except Exception as e:
-            pdb.set_trace()
+
             print(e)
 
 

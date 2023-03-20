@@ -25,7 +25,7 @@ class HomemateScraper(Scraper):
         self.wait_presence_of_element_by_cssselector("#beacon img", 1)
 
     def __get_table_links(self, record: Nayose):
-        tmp_elm = self.get_element_by_find("span", class_="m_prpty_result_head_hit")
+        tmp_elm = self.get_element_by_select_one("span.m_prpty_result_head_hit")
         total_num = int(re.sub(r"[^\d]+", "", tmp_elm.text))
         if total_num == 0:
             return
@@ -46,13 +46,12 @@ class HomemateScraper(Scraper):
 
         links = []
         for box in boxes:
-            box_address = self.get_element_by_select_one(
-                "p.m_prpty_maininfo_txt", box
-            ).text
+            selector = "p.m_prpty_maininfo_txt"
+            box_address = self.get_element_by_select_one(selector, box).text
+
             if search_address in box_address:
-                link = self.get_element_by_select_one(
-                    "div.m_prpty_itemlist_wrap > div.m_prpty_itemlist > div:nth-child(1) a.m_prpty_item_linkarea_btn.kpi_click"
-                )["href"]
+                selector = "div > div > div:nth-child(1) a"
+                link = self.get_element_by_select_one(selector, box)["href"]
                 links.append(link)
 
         if links:
@@ -63,8 +62,12 @@ class HomemateScraper(Scraper):
         ths = self.get_elements_by_select("table th.m_table_ws")
         data_element = [th.find_parent("table") for th in ths]
 
-        ths_in_data = [re.sub(r"[^\w]+", "", d.find("th").text) for d in data_element]
-        tds_in_data = [re.sub(r"[^\w]+", "", d.find("td").text) for d in data_element]
+        ths_in_data = [self.get_element_by_select_one("th", d) for d in data_element]
+        ths_in_data = [re.sub(r"[^\w]+", "", th.text) for th in ths_in_data]
+
+        tds_in_data = [self.get_element_by_select_one("td", d) for d in data_element]
+        tds_in_data = [re.sub(r"[^\w]+", "", td.text) for td in tds_in_data]
+
         property_dict = dict(zip(ths_in_data, tds_in_data))
 
         self.row_data.append(property_dict)
@@ -82,4 +85,4 @@ class HomemateScraper(Scraper):
         for link in links:
             self.open_page(url=f"{self.base_url}{link}")
             self.wait_presence_of_element_by_cssselector("#beacon img", 1)
-            self.__scrape_contents(record)
+            self.__scrape_contents()
