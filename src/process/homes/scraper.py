@@ -6,11 +6,12 @@ from process.common.scraper import Scraper
 
 
 class HomesScraper(Scraper):
+    all_data = []
+
     def __init__(self, default_dl_path="", is_headless=False):
         super().__init__(default_dl_path, is_headless)
         self.base_url = "https://www.homes.co.jp"
         self.liblary_url = "https://www.homes.co.jp/archive/list/search/?keyword="
-        self.row_data = []
 
     def filtering_timewalk(self, timewalk: int):
         select_box = Select(self.find_element(By.ID, "cond_walkminutes"))
@@ -35,8 +36,6 @@ class HomesScraper(Scraper):
 
     def get_table_links(self, record: Nayose) -> list | None:
         total_num_element = self.get_element_by_find("span", class_="totalNum")
-        if total_num_element is None:
-            return
 
         # 次ページへ行くとブロックされるので絞り込みを行う(20=最大表示件数)
         if int(total_num_element.text) > 20:
@@ -76,4 +75,4 @@ class HomesScraper(Scraper):
         for d in [dict(zip(th, td)) for th, td in zip(ths, tds)]:
             merge_dict.update(d)
 
-        self.row_data.append(merge_dict)
+        self.all_data.append(merge_dict)

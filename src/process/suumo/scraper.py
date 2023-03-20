@@ -1,10 +1,5 @@
-from bs4 import BeautifulSoup
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-
 from model.nayose import Nayose
 from process.common.scraper import Scraper
-from process.suumo.conditions import SuumoConditions
 
 
 class SuumoScraper(Scraper):
@@ -20,29 +15,6 @@ class SuumoScraper(Scraper):
         )
         links = [a["href"] for a in result_boxes]
         return links
-
-    def __filtering_condition(self, conditions: SuumoConditions):
-        self.find_element(By.CSS_SELECTOR, "a[title='条件を追加・変更する']").click()
-        self.waitng.until(lambda x: self.page_is_loaded())
-
-        xpath_str_dict = conditions.linked_element_dict()
-        for k, v in conditions.to_dict().items():
-            if k == "property_name" or k == "prefecture" or k == "city":
-                continue
-            if v:
-                # 選択する値が誤っていてもそのまま処理を続ける
-                try:
-                    xpath_string = f"//li[contains(.//{xpath_str_dict[k]['tag']}, '{v}')]{xpath_str_dict[k]['to_input']}"
-                    self.find_element(
-                        By.XPATH,
-                        xpath_string,
-                    ).click()
-                except NoSuchElementException as e:
-                    self.__add_element_error_detail(e)
-                    continue
-
-        self.find_element(By.ID, "bottomSubmit").click()
-        self.waitng.until(lambda x: self.page_is_loaded())
 
     def __scrape_contents(self):
         trs = self.get_elements_by_select(
@@ -62,8 +34,6 @@ class SuumoScraper(Scraper):
         self.open_page(
             url=f"{self.liblary_url}{record.name}+{record.prefecture}+{record.city}"
         )
-        # MEMO:とりあえずキーワード検索でどの程度取得できるか確認してみて、精度が低かったら条件追加も行う方向性
-        # self.__filtering_condition(conditions)
 
         links = self.__get_table_links()
         # 該当するデータが一つもない場合、returnする

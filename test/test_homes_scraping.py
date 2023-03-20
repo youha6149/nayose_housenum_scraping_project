@@ -12,7 +12,6 @@ def test_suumo_scraping():
     session = next(db)
     housenum0_record = session.query(Nayose).filter_by(housenum=0).all()
 
-    all_data = []
     for i in range(48, 58):
         try:
             with HomesScraper() as bot:
@@ -33,7 +32,6 @@ def test_suumo_scraping():
                     time.sleep(1)
 
                     bot.scrape_table_data()
-                    all_data.append(bot.row_data)
 
                 time.sleep(2)
 
@@ -41,7 +39,7 @@ def test_suumo_scraping():
             print(e)
             continue
 
-    print(all_data)
+    print(HomesScraper.all_data)
 
 
 if __name__ == "__main__":
