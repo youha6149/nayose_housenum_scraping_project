@@ -1,5 +1,6 @@
 import pdb
 import time
+import traceback
 
 from log.logger import setup_logger
 from model.nayose import Nayose
@@ -12,7 +13,7 @@ def test_suumo_scraping():
     session = next(db)
     housenum0_record = session.query(Nayose).filter_by(housenum=0).all()
 
-    for i in range(48, 58):
+    for i in range(50, 51):
         try:
             with HomesScraper() as bot:
                 # 物件一覧ページに遷移
@@ -20,7 +21,7 @@ def test_suumo_scraping():
                 bot.open_page(f"{bot.liblary_url}{housenum0_record[i].name}")
                 time.sleep(1)
                 # 物件一覧から各物件のURLを取得する
-                links = bot.get_table_links(housenum0_record[i])
+                links = bot.get_links(housenum0_record[i])
 
             if links is None:
                 continue
@@ -37,6 +38,7 @@ def test_suumo_scraping():
 
         except Exception as e:
             print(e)
+            print(traceback.format_exc())
             continue
 
     print(HomesScraper.all_data)

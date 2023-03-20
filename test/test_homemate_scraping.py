@@ -12,17 +12,17 @@ def test_unit_homemate_read_nayose():
     housenum0_record = session.query(Nayose).filter_by(housenum=0).all()
 
     with HomemateScraper() as bot:
-        try:
-            for i in range(39, 49):
-
+        for i in range(39, 49):
+            try:
                 print(i)
                 record = housenum0_record[i]
 
                 bot.scrape_homemate(record)
-            print(bot.row_data)
-        except Exception as e:
 
-            print(e)
+            except Exception as e:
+                print(e)
+
+        print(bot.row_data)
 
 
 if __name__ == "__main__":
