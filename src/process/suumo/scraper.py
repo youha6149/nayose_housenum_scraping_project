@@ -9,18 +9,18 @@ class SuumoScraper(Scraper):
         self.liblary_url = "https://suumo.jp/library/search/ichiran.html?qr="
         self.row_data = []
 
-    def __get_table_links(self):
+    def get_links(self):
         result_boxes = self.get_elements_by_select(
             "#contents > table > tbody > tr > td > div > a"
         )
         links = [a["href"] for a in result_boxes]
         return links
 
-    def __scrape_contents(self):
+    def scrape_contents(self):
         trs = self.get_elements_by_select(
             "#contents > div > div > div > table > tbody > tr"
         )
-        row_dict = {"物件名": self.soup.find("h1").text}
+        row_dict = {"物件名": self.get_element_by_select_one("h1").text}
         for tr in trs:
             # {"住所": "北海道 函館市 湯川町３"}
             th_texts = [th.text for th in tr.find_all("th")]
@@ -35,11 +35,11 @@ class SuumoScraper(Scraper):
             url=f"{self.liblary_url}{record.name}+{record.prefecture}+{record.city}"
         )
 
-        links = self.__get_table_links()
+        links = self.get_links()
         # 該当するデータが一つもない場合、returnする
         if not links:
             return "not links"
 
         for link in links:
             self.open_page(url=f"{self.base_url}{link}")
-            self.__scrape_contents()
+            self.scrape_contents()

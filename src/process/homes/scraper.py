@@ -33,8 +33,9 @@ class HomesScraper(Scraper):
         if not timewalk == "":
             select_box.select_by_visible_text(timewalk)
         self.waitng.until(lambda x: self.page_is_loaded())
+        self.init_soup()
 
-    def get_table_links(self, record: Nayose) -> list | None:
+    def get_links(self, record: Nayose) -> list | None:
         total_num_element = self.get_element_by_select_one("span.totalNum")
         # 次ページへ行くとブロックされるので絞り込みを行う(20=最大表示件数)
         if int(total_num_element.text) > 20:

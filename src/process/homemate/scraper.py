@@ -23,8 +23,9 @@ class HomemateScraper(Scraper):
 
         select_element.select_by_visible_text(pref)
         self.wait_presence_of_element_by_cssselector("#beacon img", 1)
+        self.init_soup()
 
-    def __get_table_links(self, record: Nayose):
+    def get_links(self, record: Nayose):
         tmp_elm = self.get_element_by_select_one("span.m_prpty_result_head_hit")
         total_num = int(re.sub(r"[^\d]+", "", tmp_elm.text))
         if total_num == 0:
@@ -57,7 +58,7 @@ class HomemateScraper(Scraper):
         if links:
             return links
 
-    def __scrape_contents(self):
+    def scrape_contents(self):
         # 物件名・階数・物件種別・所在地・アクセス・構造
         ths = self.get_elements_by_select("table th.m_table_ws")
         data_element = [th.find_parent("table") for th in ths]
@@ -76,7 +77,7 @@ class HomemateScraper(Scraper):
         self.open_page(f"{self.liblary_url}{record.name}/")
         self.wait_presence_of_element_by_cssselector("#beacon img", 1)
 
-        links = self.__get_table_links(record)
+        links = self.get_links(record)
 
         # 該当するデータが一つもない場合、returnする
         if not links:
@@ -85,4 +86,4 @@ class HomemateScraper(Scraper):
         for link in links:
             self.open_page(url=f"{self.base_url}{link}")
             self.wait_presence_of_element_by_cssselector("#beacon img", 1)
-            self.__scrape_contents()
+            self.scrape_contents()
