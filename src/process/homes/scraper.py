@@ -35,37 +35,36 @@ class HomesScraper(Scraper):
         self.waitng.until(lambda x: self.page_is_loaded())
 
     def get_table_links(self, record: Nayose) -> list | None:
-        total_num_element = self.get_element_by_find("span", class_="totalNum")
-
+        total_num_element = self.get_element_by_select_one("span.totalNum")
         # 次ページへ行くとブロックされるので絞り込みを行う(20=最大表示件数)
         if int(total_num_element.text) > 20:
             self.filtering_timewalk(record.timewalk)
 
             # DOMが変わるので再度total_num_elementを取得
-            total_num_element = self.get_element_by_find("span", class_="totalNum")
+            total_num_element = self.get_element_by_select_one("span.totalNum")
             if int(total_num_element.text) > 20:
                 return
 
         # 所在地にnayoseデータの都道府県名+市区町村名が入っているもののみ取得
-        property_attr = {"class_": "mod-building ui-frame-base"}
-        property_lists = self.get_elements_by_find_all("div", **property_attr)
+        property_lists = self.get_elements_by_select("div.mod-building.ui-frame-base")
         address = f"{record.prefecture}{record.city}"
         links = [
-            l.select_one("h2 > a").get("href")
+            self.get_element_by_select_one("h2 > a", l).get("href")
             for l in property_lists
-            if address in l.find("p", class_="address").text
+            if address in self.get_element_by_select_one("p.address", l).text
         ]
-
         return links
 
     def scrape_table_data(self):
-        spec_tables = self.get_elements_by_find_all("table", class_="mod-tableVertical")
-        ths = [
-            [th.contents[0].strip() for th in tbl.find_all("th")] for tbl in spec_tables
-        ]
+        specs = self.get_elements_by_select("table.mod-tableVertical")
+
+        ths = [[th for th in self.get_elements_by_select("th", tbl)] for tbl in specs]
+        ths = [[th.contents[0].strip() for th in th_l] for th_l in ths]
         # [['所在地', '交通'], ['物件種別', '築年月（築年数）', '建物構造', '建物階建', '総戸数'], ['設備・条件']]
 
-        tds = [[td.text for td in tbl.find_all("td")] for tbl in spec_tables]
+        tds = [
+            [td.text for td in self.get_elements_by_select("td", tbl)] for tbl in specs
+        ]
 
         tds[0][0] = tds[0][0].split("\n")[1]
         tds[0][1] = ",".join([t for t in tds[0][1].split("\n") if not t == ""])
