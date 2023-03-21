@@ -3,11 +3,13 @@ import shutil
 
 from fastapi import Depends, FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from model.nayose import Nayose
 from model.setting import get_nayose_db
+from process.homemate.run import run as run_homemate
+from process.homes.run import run as run_homes
+from process.suumo.run import run as run_suumo
 
 app = FastAPI()
 origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
@@ -50,10 +52,14 @@ def execute_scraping(
         shutil.copyfileobj(contents, upload_dir)
 
     # 2. ファイルをdbに変換する
-    # TODO:アップロードされたファイルのパスを_init_dataに渡す方式に変える
-    Nayose._init_data()
+    Nayose._init_data(upload_filepath)
 
-    housenum0_record = db.query(Nayose).filter_by(housenum=0).all()
+    # 3. 各スクレイピング処理の実行
+    # TODO:各スクレイピング処理で作成されたデータを共通化する
+    # housenum0_record = db.query(Nayose).filter_by(housenum=0).all()
+    # run_suumo(housenum0_record)
+    # run_homes(housenum0_record)
+    # run_homemate(housenum0_record)
 
 
 # 各スクレイピングクラスのrunにrecordを渡して実行
