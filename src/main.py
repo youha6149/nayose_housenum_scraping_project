@@ -1,5 +1,7 @@
+import glob
 import os
 import shutil
+import traceback
 
 from fastapi import Depends, FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,34 +34,69 @@ def index():
 def test_file_action(
     db: Session = Depends(get_nayose_db), file: UploadFile = File(...)
 ):
-    name = f"test_{file.filename}"
-    contents = file.file
-    upload_filepath = os.path.join(f"{os.getcwd()}/src/csv/", name)
-    with open(upload_filepath, "wb+") as upload_dir:
-        shutil.copyfileobj(contents, upload_dir)
-    return {"filename": name}
+    try:
+        name = f"test_{file.filename}"
+        contents = file.file
+        upload_filepath = os.path.join(f"{os.getcwd()}/src/csv/", name)
+        with open(upload_filepath, "wb+") as upload_dir:
+            shutil.copyfileobj(contents, upload_dir)
+
+        Nayose._init_data(upload_filepath)
+
+        return {"filename": name}
+    except Exception as e:
+        db_dir = f"{os.getcwd()}/src/db/*.db"
+        if os.path.exists(db_dir):
+            for file_path in glob.glob(db_dir):
+                os.remove(file_path)
+
+        csv_dir = f"{os.getcwd()}/src/csv/*.csv"
+        if os.path.exists(csv_dir):
+            for file_path in glob.glob(csv_dir):
+                os.remove(file_path)
+
+        print(traceback.format_exc())
+        return e
 
 
+# TODO:すべてのデータ作業が終わったらdbファイルの削除を行う
 @app.post("/execute_scraping")
 def execute_scraping(
     db: Session = Depends(get_nayose_db), file: UploadFile = File(...)
 ):
-    # 1. rawファイルの取得
-    name = f"test_{file.filename}"
-    contents = file.file
-    upload_filepath = os.path.join(f"{os.getcwd()}/src/csv/", name)
-    with open(upload_filepath, "wb+") as upload_dir:
-        shutil.copyfileobj(contents, upload_dir)
+    try:
+        # 1. rawファイルの取得
+        name = f"test_{file.filename}"
+        contents = file.file
+        upload_filepath = os.path.join(f"{os.getcwd()}/src/csv/", name)
+        with open(upload_filepath, "wb+") as upload_dir:
+            shutil.copyfileobj(contents, upload_dir)
 
-    # 2. ファイルをdbに変換する
-    Nayose._init_data(upload_filepath)
+        # 2. ファイルをdbに変換する
+        Nayose._init_data(upload_filepath)
 
-    # 3. 各スクレイピング処理の実行
-    # TODO:各スクレイピング処理で作成されたデータを共通化する
-    # housenum0_record = db.query(Nayose).filter_by(housenum=0).all()
-    # run_suumo(housenum0_record)
-    # run_homes(housenum0_record)
-    # run_homemate(housenum0_record)
+        # 3. 各スクレイピング処理の実行
+        # TODO:各スクレイピング処理で作成されたデータを共通化する
+        # housenum0_record = db.query(Nayose).filter_by(housenum=0).all()
+        # run_suumo(housenum0_record)
+        # run_homes(housenum0_record)
+        # run_homemate(housenum0_record)
+
+    # 4. 使用したdbファイルを削除する
+    # エラー時に使用したCSVとdbファイルを削除するようにする
+    except Exception as e:
+        db_dir = f"{os.getcwd()}/src/db/*.db"
+        if os.path.exists(db_dir):
+            for file_path in glob.glob(db_dir):
+                os.remove(file_path)
+
+        csv_dir = f"{os.getcwd()}/src/csv/*.csv"
+        if os.path.exists(csv_dir):
+            for file_path in glob.glob(csv_dir):
+                os.remove(file_path)
+
+        print(traceback.format_exc())
+        return e
 
 
 # 各スクレイピングクラスのrunにrecordを渡して実行
