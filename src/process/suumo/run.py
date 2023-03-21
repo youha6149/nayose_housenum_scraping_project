@@ -4,7 +4,11 @@ from selenium.common.exceptions import NoSuchElementException
 
 from model.nayose import Nayose
 from process.suumo.scraper import SuumoScraper
-from src.log.logger import setup_logger
+
+if __name__ == "__main__":
+    from src.log.logger import setup_logger
+else:
+    from log.logger import setup_logger
 
 
 def run(housenum0_record: list[Nayose]) -> list | None:

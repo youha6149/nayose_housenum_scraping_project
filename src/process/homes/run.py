@@ -1,12 +1,14 @@
-import pdb
-import time
 import traceback
 
 from selenium.common.exceptions import NoSuchElementException
 
-from log.logger import setup_logger
 from model.nayose import Nayose
 from process.homes.scraper import HomesScraper
+
+if __name__ == "__main__":
+    from src.log.logger import setup_logger
+else:
+    from log.logger import setup_logger
 
 
 def run(housenum0_record: list[Nayose]):
