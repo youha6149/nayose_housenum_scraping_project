@@ -1,3 +1,4 @@
+import glob
 import os
 
 import pandas as pd
@@ -24,6 +25,11 @@ class Nayose(Base):
 
     @classmethod
     def _init_data(cls, csv_file_path: str):
+        db_dir = f"{os.getcwd()}/src/db/*.db"
+        if os.path.exists(db_dir):
+            for file_path in glob.glob(db_dir):
+                os.remove(file_path)
+
         nayose_df = pd.read_csv(csv_file_path)
         nayose_df["id"] = nayose_df.index
         nayose_trans_df = nayose_df[
