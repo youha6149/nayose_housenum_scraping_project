@@ -23,8 +23,8 @@ class Nayose(Base):
     housenum = Column(Integer)
 
     @classmethod
-    def _init_data(cls):
-        nayose_df = pd.read_csv(f"{os.getcwd()}/src/csv/nayose_raw - raw (1).csv")
+    def _init_data(cls, csv_file_path: str):
+        nayose_df = pd.read_csv(csv_file_path)
         nayose_df["id"] = nayose_df.index
         nayose_trans_df = nayose_df[[k for k in vars(cls) if not k.startswith("_")]]
 
