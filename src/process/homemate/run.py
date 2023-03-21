@@ -26,10 +26,8 @@ def run(housenum0_record: list[Nayose]) -> list | None:
             except Exception as e:
                 logger.error(f"An error occurred: {e}")
                 logger.error(f"{traceback.format_exc()}")
+                if bot.row_data:
+                    return bot.row_data
                 return
 
         return bot.row_data
-
-
-# Homemate
-# ['賃料共益費', '敷金礼金', '敷引償却', '間取り', '居室階数', '専有面積', '方角', '築年数', '駐車場', '物件種別', '所在地', 'アクセス', 'キッチン', 'セキュリティー', '専用機能', '建物設備環境', '通信環境', '入居条件', 'バストイレ', '室内設備', '物件名', '物件No', '総戸数', '取引態様', '契約形態', 'その他費用', '家賃保証', '主な周辺施設'

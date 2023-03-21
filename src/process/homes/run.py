@@ -38,10 +38,8 @@ def run(housenum0_record: list[Nayose]):
         except Exception as e:
             logger.error(f"An error occurred: {e}")
             logger.error(f"{traceback.format_exc()}")
+            if HomesScraper.all_data:
+                return HomesScraper.all_data
             return
 
     return HomesScraper.all_data
-
-
-# HOMES
-# ['所在地', '交通', '物件種別', '築年月（築年数）', '建物構造', '建物階建', '総戸数', '設備・条件']

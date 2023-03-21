@@ -26,10 +26,8 @@ def run(housenum0_record: list[Nayose]) -> list | None:
             except Exception as e:
                 logger.error(f"An error occurred: {e}")
                 logger.error(f"{traceback.format_exc()}")
+                if bot.row_data:
+                    return bot.row_data
                 return
 
         return bot.row_data
-
-
-# suumo出力値
-# ['物件名', '住所', '最寄駅', '種別', '築年月', '構造', '敷地面積', '階建', '建築面積', '総戸数', '駐車場']
