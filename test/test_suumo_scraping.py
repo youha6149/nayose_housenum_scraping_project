@@ -15,7 +15,7 @@ def test_suumo_scraping():
     # 以下をまとめて関数として定義する
     with SuumoScraper() as bot:
         try:
-            for i in range(10):
+            for i in range(len(housenum0_record)):
                 print(i)
                 record = housenum0_record[i]
                 bot.scrape_suumo(record)
@@ -24,7 +24,7 @@ def test_suumo_scraping():
             logger = setup_logger("Scraper_logger", "scraper_error.log")
             logger.error(f"An error occurred: {e}")
             pdb.set_trace()
-
+        pdb.set_trace()
         print(bot.row_data)
 
 

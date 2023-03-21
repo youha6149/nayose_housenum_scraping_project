@@ -41,3 +41,7 @@ def run(housenum0_record: list[Nayose]):
             return
 
     return HomesScraper.all_data
+
+
+# HOMES
+# ['所在地', '交通', '物件種別', '築年月（築年数）', '建物構造', '建物階建', '総戸数', '設備・条件']

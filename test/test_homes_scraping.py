@@ -13,7 +13,7 @@ def test_suumo_scraping():
     session = next(db)
     housenum0_record = session.query(Nayose).filter_by(housenum=0).all()
 
-    for i in range(50, 51):
+    for i in range(len(housenum0_record)):
         try:
             with HomesScraper() as bot:
                 # 物件一覧ページに遷移
@@ -40,8 +40,10 @@ def test_suumo_scraping():
             print(e)
             print(traceback.format_exc())
             continue
-
+    pdb.set_trace()
     print(HomesScraper.all_data)
+    # HOMES
+    # ['所在地', '交通', '物件種別', '築年月（築年数）', '建物構造', '建物階建', '総戸数', '設備・条件']
 
 
 if __name__ == "__main__":
