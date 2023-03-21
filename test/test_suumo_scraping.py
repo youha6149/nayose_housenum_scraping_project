@@ -1,4 +1,7 @@
 import pdb
+import traceback
+
+from selenium.common.exceptions import NoSuchElementException
 
 from log.logger import setup_logger
 from model.nayose import Nayose
@@ -14,16 +17,22 @@ def test_suumo_scraping():
 
     # 以下をまとめて関数として定義する
     with SuumoScraper() as bot:
-        try:
-            for i in range(len(housenum0_record)):
+        for i in range(len(housenum0_record)):
+            try:
                 print(i)
                 record = housenum0_record[i]
                 bot.scrape_suumo(record)
 
-        except Exception as e:
-            logger = setup_logger("Scraper_logger", "scraper_error.log")
-            logger.error(f"An error occurred: {e}")
-            pdb.set_trace()
+            except NoSuchElementException as e:
+                print(e)
+                print(traceback.format_exc())
+                continue
+
+            except Exception as e:
+                print(e)
+                print(traceback.format_exc())
+                pdb.set_trace()
+
         pdb.set_trace()
         print(bot.row_data)
 

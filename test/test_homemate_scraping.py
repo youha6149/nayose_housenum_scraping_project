@@ -1,5 +1,8 @@
 import pdb
 import time
+import traceback
+
+from selenium.common.exceptions import NoSuchElementException
 
 from model.nayose import Nayose
 from model.setting import get_nayose_db
@@ -19,8 +22,19 @@ def test_unit_homemate_read_nayose():
 
                 bot.scrape_homemate(record)
 
+            except NoSuchElementException as e:
+                if "totalNum" in e.msg:
+                    continue
+
+                print(e)
+                print(traceback.format_exc())
+                continue
+
             except Exception as e:
                 print(e)
+                print(traceback.format_exc())
+                pdb.set_trace()
+
         pdb.set_trace()
         print(bot.row_data)
 

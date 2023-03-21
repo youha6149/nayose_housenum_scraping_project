@@ -2,6 +2,8 @@ import pdb
 import time
 import traceback
 
+from selenium.common.exceptions import NoSuchElementException
+
 from log.logger import setup_logger
 from model.nayose import Nayose
 from model.setting import get_nayose_db
@@ -36,10 +38,16 @@ def test_suumo_scraping():
 
                 time.sleep(2)
 
-        except Exception as e:
+        except NoSuchElementException as e:
             print(e)
             print(traceback.format_exc())
             continue
+
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
+            pdb.set_trace()
+
     pdb.set_trace()
     print(HomesScraper.all_data)
     # HOMES
