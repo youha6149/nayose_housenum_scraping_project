@@ -1,6 +1,8 @@
 import pdb
+import time
 import traceback
 
+from mod.measure_time_decorator import measure_time
 from selenium.common.exceptions import NoSuchElementException
 
 from log.logger import setup_logger
@@ -10,6 +12,7 @@ from process.suumo.conditions import SuumoConditions
 from process.suumo.scraper import SuumoScraper
 
 
+@measure_time
 def test_suumo_scraping():
     db = get_nayose_db()
     session = next(db)
@@ -33,8 +36,7 @@ def test_suumo_scraping():
                 print(traceback.format_exc())
                 pdb.set_trace()
 
-        pdb.set_trace()
-        print(bot.row_data)
+        return bot.row_data
 
 
 if __name__ == "__main__":

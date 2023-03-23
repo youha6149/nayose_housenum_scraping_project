@@ -2,6 +2,7 @@ import pdb
 import time
 import traceback
 
+from mod.measure_time_decorator import measure_time
 from selenium.common.exceptions import NoSuchElementException
 
 from log.logger import setup_logger
@@ -10,11 +11,11 @@ from model.setting import get_nayose_db
 from process.homes.scraper import HomesScraper
 
 
+@measure_time
 def test_suumo_scraping():
     db = get_nayose_db()
     session = next(db)
     housenum0_record = session.query(Nayose).filter_by(housenum=0).all()
-
     for i in range(len(housenum0_record)):
         try:
             with HomesScraper() as bot:
@@ -39,6 +40,8 @@ def test_suumo_scraping():
                 time.sleep(2)
 
         except NoSuchElementException as e:
+            if "totalNum" == e.msg:
+                continue
             print(e)
             print(traceback.format_exc())
             continue
@@ -48,10 +51,7 @@ def test_suumo_scraping():
             print(traceback.format_exc())
             pdb.set_trace()
 
-    pdb.set_trace()
-    print(HomesScraper.all_data)
-    # HOMES
-    # ['所在地', '交通', '物件種別', '築年月（築年数）', '建物構造', '建物階建', '総戸数', '設備・条件']
+    return HomesScraper.all_data
 
 
 if __name__ == "__main__":

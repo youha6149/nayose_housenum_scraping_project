@@ -2,6 +2,7 @@ import pdb
 import time
 import traceback
 
+from mod.measure_time_decorator import measure_time
 from selenium.common.exceptions import NoSuchElementException
 
 from model.nayose import Nayose
@@ -9,6 +10,7 @@ from model.setting import get_nayose_db
 from process.homemate.scraper import HomemateScraper
 
 
+@measure_time
 def test_unit_homemate_read_nayose():
     db = get_nayose_db()
     session = next(db)
@@ -35,8 +37,7 @@ def test_unit_homemate_read_nayose():
                 print(traceback.format_exc())
                 pdb.set_trace()
 
-        pdb.set_trace()
-        print(bot.row_data)
+        return bot.row_data
 
 
 if __name__ == "__main__":
