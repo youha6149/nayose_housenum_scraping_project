@@ -40,7 +40,7 @@ class HomemateScraper(Scraper):
             # 変化したHTMLを再度取得する
             boxes = self.get_elements_by_select("section.m_prpty_box")
             # 絞り込んでもデータ数が多い場合、ブランド名や地域名などのエラーデータの可能性あり
-            if len(boxes) > 25:
+            if len(boxes) > 5:
                 return
 
         search_address = f"{record.prefecture}{record.city}"
@@ -63,11 +63,15 @@ class HomemateScraper(Scraper):
         ths = self.get_elements_by_select("table th.m_table_ws")
         data_element = [th.find_parent("table") for th in ths]
 
-        ths_in_data = [self.get_element_by_select_one("th", d) for d in data_element]
-        ths_in_data = [re.sub(r"[^\w]+", "", th.text) for th in ths_in_data]
+        ths_in_data = [self.get_elements_by_select("th", d) for d in data_element]
+        ths_in_data = [
+            th.text.replace("\n", " ").strip() for l in ths_in_data for th in l
+        ]
 
-        tds_in_data = [self.get_element_by_select_one("td", d) for d in data_element]
-        tds_in_data = [re.sub(r"[^\w]+", "", td.text) for td in tds_in_data]
+        tds_in_data = [self.get_elements_by_select("td", d) for d in data_element]
+        tds_in_data = [
+            td.text.replace("\n", " ").strip() for l in tds_in_data for td in l
+        ]
 
         property_dict = dict(zip(ths_in_data, tds_in_data))
 
