@@ -11,11 +11,13 @@ else:
     from log.logger import setup_logger
 
 
-def run_homes_scraper(housenum0_record: list[Nayose]):
+def run_homes_scraper(
+    housenum0_record: list[Nayose], is_headless=False
+) -> dict[str | list] | None:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
     for record in housenum0_record:
         try:
-            with HomesScraper() as bot:
+            with HomesScraper(is_headless=is_headless) as bot:
                 # 物件一覧ページに遷移
                 bot.open_page(f"{bot.liblary_url}{record.name}")
                 # 物件一覧から各物件のURLを取得する
@@ -25,7 +27,7 @@ def run_homes_scraper(housenum0_record: list[Nayose]):
                 continue
 
             for link in links:
-                with HomesScraper() as bot:
+                with HomesScraper(is_headless=is_headless) as bot:
                     # 物件詳細ページに遷移
                     bot.open_page(f"{bot.base_url}{link}")
                     bot.scrape_table_data()
@@ -44,4 +46,4 @@ def run_homes_scraper(housenum0_record: list[Nayose]):
                 return HomesScraper.all_data
             return
 
-    return HomesScraper.all_data
+    return {"homes": HomesScraper.all_data}

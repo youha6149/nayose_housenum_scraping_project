@@ -11,9 +11,11 @@ else:
     from log.logger import setup_logger
 
 
-def run_suumo_scraper(housenum0_record: list[Nayose]) -> list | None:
+def run_suumo_scraper(
+    housenum0_record: list[Nayose], is_headless=False
+) -> dict[str | list] | None:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
-    with SuumoScraper() as bot:
+    with SuumoScraper(is_headless=is_headless) as bot:
         for record in housenum0_record:
             try:
                 bot.scrape_suumo(record)
@@ -30,4 +32,4 @@ def run_suumo_scraper(housenum0_record: list[Nayose]) -> list | None:
                     return bot.row_data
                 return
 
-        return bot.row_data
+        return {"suumo": bot.row_data}

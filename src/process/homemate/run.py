@@ -11,9 +11,11 @@ else:
     from log.logger import setup_logger
 
 
-def run_homemate_scraper(housenum0_record: list[Nayose]) -> list | None:
+def run_homemate_scraper(
+    housenum0_record: list[Nayose], is_headless=False
+) -> dict[str | list] | None:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
-    with HomemateScraper() as bot:
+    with HomemateScraper(is_headless=is_headless) as bot:
         for record in housenum0_record:
             try:
                 bot.scrape_homemate(record)
@@ -30,4 +32,4 @@ def run_homemate_scraper(housenum0_record: list[Nayose]) -> list | None:
                     return bot.row_data
                 return
 
-        return bot.row_data
+        return {"homemate": bot.row_data}
