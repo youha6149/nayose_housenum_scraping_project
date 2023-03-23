@@ -57,6 +57,7 @@ class HomesScraper(Scraper):
         return links
 
     def scrape_table_data(self):
+
         specs = self.get_elements_by_select("table.mod-tableVertical")
 
         ths = [[th for th in self.get_elements_by_select("th", tbl)] for tbl in specs]
@@ -71,7 +72,8 @@ class HomesScraper(Scraper):
         tds[0][1] = ",".join([t for t in tds[0][1].split("\n") if not t == ""])
         tds = [[t.strip() for t in td] for td in tds]
 
-        merge_dict = {}
+        name = self.get_element_by_select_one("h1.heading.is-figure").text.strip()
+        merge_dict = {"物件名": name}
         for d in [dict(zip(th, td)) for th, td in zip(ths, tds)]:
             merge_dict.update(d)
 
