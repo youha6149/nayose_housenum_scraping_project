@@ -11,7 +11,7 @@ else:
     from log.logger import setup_logger
 
 
-def run(housenum0_record: list[Nayose]) -> list | None:
+def run_suumo_scraper(housenum0_record: list[Nayose]) -> list | None:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
     with SuumoScraper() as bot:
         for record in housenum0_record:

@@ -11,7 +11,7 @@ else:
     from log.logger import setup_logger
 
 
-def run(housenum0_record: list[Nayose]):
+def run_homes_scraper(housenum0_record: list[Nayose]):
     logger = setup_logger("Scraper_logger", "scraper_error.log")
     for record in housenum0_record:
         try:
@@ -31,6 +31,8 @@ def run(housenum0_record: list[Nayose]):
                     bot.scrape_table_data()
 
         except NoSuchElementException as e:
+            if "totalNum" in e.msg:
+                continue
             logger.info(f"NoSuchElementException: {e}")
             logger.info(f"{traceback.format_exc()}")
             continue
