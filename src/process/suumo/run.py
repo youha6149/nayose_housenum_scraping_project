@@ -13,7 +13,7 @@ else:
 
 def run_suumo_scraper(
     housenum0_record: list[Nayose], is_headless=False
-) -> dict[str | list] | None:
+) -> dict[str, list[dict[str, int | str]]] | None:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
     with SuumoScraper(is_headless=is_headless) as bot:
         for record in housenum0_record:

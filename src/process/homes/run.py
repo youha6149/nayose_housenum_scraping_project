@@ -3,6 +3,7 @@ import traceback
 from selenium.common.exceptions import NoSuchElementException
 
 from model.nayose import Nayose
+from process.common.utils import Util
 from process.homes.scraper import HomesScraper
 
 if __name__ == "__main__":
@@ -13,7 +14,8 @@ else:
 
 def run_homes_scraper(
     housenum0_record: list[Nayose], is_headless=False
-) -> dict[str | list] | None:
+) -> dict[str, list[dict[str, int | str]]] | None:
+    util = Util()
     logger = setup_logger("Scraper_logger", "scraper_error.log")
     for record in housenum0_record:
         try:
@@ -43,7 +45,11 @@ def run_homes_scraper(
             logger.error(f"An error occurred: {e}")
             logger.error(f"{traceback.format_exc()}")
             if HomesScraper.all_data:
+                util.trans_cols_name(HomesScraper)
                 return HomesScraper.all_data
             return
+
+    if HomesScraper.all_data:
+        util.trans_cols_name(HomesScraper.all_data)
 
     return {"homes": HomesScraper.all_data}
