@@ -17,7 +17,6 @@ def run_homes_scraper(
 ) -> dict[str, list[dict[str, int | str]]]:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
 
-    all_data_dict = {"homes": []}
     for record in housenum0_record:
         try:
             with HomesScraper(is_headless=is_headless) as bot:
@@ -33,8 +32,7 @@ def run_homes_scraper(
                 with HomesScraper(is_headless=is_headless) as bot:
                     # 物件詳細ページに遷移
                     bot.open_page(f"{bot.base_url}{link}")
-                    merge_dict = bot.scrape_table_data()
-                    all_data_dict["homes"].append(merge_dict)
+                    bot.scrape_table_data()
 
         except NoSuchElementException as e:
             if "totalNum" in e.msg:
@@ -46,6 +44,6 @@ def run_homes_scraper(
         except Exception as e:
             logger.error(f"An error occurred: {e}")
             logger.error(f"{traceback.format_exc()}")
-            return all_data_dict
+            return HomesScraper.all_data_dict
 
-    return all_data_dict
+    return HomesScraper.all_data_dict
