@@ -13,7 +13,7 @@ class HomemateScraper(Scraper):
         super().__init__(default_dl_path, is_headless)
         self.base_url = "https://www.homemate.co.jp"
         self.liblary_url = "https://www.homemate.co.jp/keyword/"
-        self.row_data = []
+        self.row_data_dict = {"homemate": []}
 
     def filtering_prefecture(self, record: Nayose):
         select_element = Select(self.find_element(By.ID, "list-city-select2"))
@@ -75,7 +75,7 @@ class HomemateScraper(Scraper):
 
         property_dict = dict(zip(ths_in_data, tds_in_data))
 
-        self.row_data.append(property_dict)
+        self.row_data_dict["homemate"].append(property_dict)
 
     def scrape_homemate(self, record: Nayose):
         self.open_page(f"{self.liblary_url}{record.name}/")

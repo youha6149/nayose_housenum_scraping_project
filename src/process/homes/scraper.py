@@ -6,7 +6,7 @@ from process.common.scraper import Scraper
 
 
 class HomesScraper(Scraper):
-    all_data = []
+    all_data_dict = {"homes": []}
 
     def __init__(self, default_dl_path="", is_headless=False):
         super().__init__(default_dl_path, is_headless)
@@ -77,4 +77,4 @@ class HomesScraper(Scraper):
         for d in [dict(zip(th, td)) for th, td in zip(ths, tds)]:
             merge_dict.update(d)
 
-        self.all_data.append(merge_dict)
+        self.all_data_dict["homes"].append(merge_dict)
