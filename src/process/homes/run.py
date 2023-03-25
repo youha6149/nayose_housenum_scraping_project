@@ -1,9 +1,9 @@
+import pdb
 import traceback
 
 from selenium.common.exceptions import NoSuchElementException
 
 from model.nayose import Nayose
-from process.common.utils import Util
 from process.homes.scraper import HomesScraper
 
 if __name__ == "__main__":
@@ -14,9 +14,10 @@ else:
 
 def run_homes_scraper(
     housenum0_record: list[Nayose], is_headless=False
-) -> dict[str, list[dict[str, int | str]]] | None:
-    util = Util()
+) -> dict[str, list[dict[str, int | str]]]:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
+
+    all_data_dict = {"homes": []}
     for record in housenum0_record:
         try:
             with HomesScraper(is_headless=is_headless) as bot:
@@ -32,7 +33,8 @@ def run_homes_scraper(
                 with HomesScraper(is_headless=is_headless) as bot:
                     # 物件詳細ページに遷移
                     bot.open_page(f"{bot.base_url}{link}")
-                    bot.scrape_table_data()
+                    merge_dict = bot.scrape_table_data()
+                    all_data_dict["homes"].append(merge_dict)
 
         except NoSuchElementException as e:
             if "totalNum" in e.msg:
@@ -44,12 +46,6 @@ def run_homes_scraper(
         except Exception as e:
             logger.error(f"An error occurred: {e}")
             logger.error(f"{traceback.format_exc()}")
-            if HomesScraper.all_data:
-                util.trans_cols_name(HomesScraper)
-                return HomesScraper.all_data
-            return
+            return all_data_dict
 
-    if HomesScraper.all_data:
-        util.trans_cols_name(HomesScraper.all_data)
-
-    return {"homes": HomesScraper.all_data}
+    return all_data_dict

@@ -13,7 +13,7 @@ else:
 
 def run_suumo_scraper(
     housenum0_record: list[Nayose], is_headless=False
-) -> dict[str, list[dict[str, int | str]]] | None:
+) -> dict[str, list[dict[str, int | str]]]:
     logger = setup_logger("Scraper_logger", "scraper_error.log")
     with SuumoScraper(is_headless=is_headless) as bot:
         for record in housenum0_record:
@@ -28,8 +28,6 @@ def run_suumo_scraper(
             except Exception as e:
                 logger.error(f"An error occurred: {e}")
                 logger.error(f"{traceback.format_exc()}")
-                if bot.row_data:
-                    return bot.row_data
-                return
+                return bot.row_data_dict
 
-        return {"suumo": bot.row_data}
+        return bot.row_data_dict
