@@ -41,12 +41,13 @@ class Util:
         df = pd.DataFrame(scrape_data)
 
         cols = self.selection_cols[site_name]
-
         rename_dict = dict(zip(cols, self.common_cols))
 
         # 必要な列のみに選抜
         df = df[cols]
         df = df.rename(columns=rename_dict)
+        # サイト名の列を追加
+        df["site_name"] = [site_name for _ in range(len(df))]
 
         return df
 
