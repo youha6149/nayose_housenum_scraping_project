@@ -1,5 +1,14 @@
+import os
+import re
+import unicodedata
+
 import pandas as pd
 from pandas import DataFrame
+
+if __name__ == "__main__":
+    from src.process.common.shaping import Shaping
+else:
+    from process.common.shaping import Shaping
 
 
 class Util:
@@ -63,3 +72,16 @@ class Util:
                 d.update({c: None})
 
         return {site_name: data}
+
+    def data_shaping(self, df: DataFrame) -> DataFrame:
+        shaping = Shaping()
+        df = shaping.homemate_address_shaping(df)
+        df = shaping.suumo_access_shaping(df)
+        df = shaping.yearpassed_shaping(df)
+        df = shaping.homemate_level_normalize(df)
+        df = shaping.homemate_level_shaping(df)
+        df = shaping.homes_level_shaping(df)
+        df = shaping.housenum_shaping(df)
+        df = shaping.level_int_only(df)
+        df = shaping.order_columns(df)
+        return df
