@@ -1,8 +1,12 @@
 import os
+import pdb
 import re
 import unicodedata
 
 import pandas as pd
+
+from process.common.shaping import Shaping
+from process.common.utils import Util
 
 
 def test_data_shaping():
@@ -11,6 +15,8 @@ def test_data_shaping():
     df = df.drop("Unnamed: 0", axis=1)
     df["id"] = [i for i in range(1, len(df) + 1)]
 
+    util = Util()
+    shaping = Shaping()
     # homemate address shaping
     address_join = lambda x: " ".join([e for e in x.split(" ") if not e == ""])
     df_homemte_address = df.loc[df["site_name"] == "homemate", "address"]
@@ -18,7 +24,7 @@ def test_data_shaping():
         address_join
     )
 
-    # homes access shaping
+    # suumo access shaping
     access_join = lambda x: " ".join(
         [e for e in x.replace("\n", "").split("\t") if not e == ""]
     )
@@ -67,5 +73,22 @@ def test_data_shaping():
     )
 
 
+def test_shaping_class():
+    df = pd.read_csv(f"{os.getcwd()}/test/csv/test_scraping.csv")
+
+    df = df.drop("Unnamed: 0", axis=1)
+    df["id"] = [i for i in range(1, len(df) + 1)]
+
+    util = Util()
+    df = util.data_shaping(df)
+
+    df.to_csv(
+        f"{os.getcwd()}/test/csv/scraping_shaping_data.csv",
+        encoding="utf-8",
+        index=False,
+    )
+
+
 if __name__ == "__main__":
-    test_data_shaping()
+    # test_data_shaping()
+    test_shaping_class()
