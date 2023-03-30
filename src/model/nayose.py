@@ -3,6 +3,7 @@ import os
 
 import pandas as pd
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Session
 
 if __name__ == "__main__":
     from setting import Base, nayose_engine
@@ -33,7 +34,11 @@ class Nayose(Base):
         nayose_df = pd.read_csv(csv_file_path)
         nayose_df["id"] = nayose_df.index
         nayose_trans_df = nayose_df[
-            [k for k in vars(cls) if not k.startswith("_") and not k == "to_dict"]
+            [
+                k
+                for k in vars(cls)
+                if not (k.startswith("_") or k == "to_dict" or k == "read_nayose_data")
+            ]
         ]
 
         nayose_trans_df.to_sql(
@@ -44,6 +49,10 @@ class Nayose(Base):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def read_nayose_data(cls, session: Session, **kwargs):
+        return session.query(cls).filter_by(**kwargs).all()
 
 
 if __name__ == "__main__":
