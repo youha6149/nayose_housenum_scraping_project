@@ -12,10 +12,11 @@ from process.homes.scraper import HomesScraper
 
 
 @measure_time
-def test_suumo_scraping():
+def test_homes_scraping():
     db = get_nayose_db()
     session = next(db)
     housenum0_record = session.query(Nayose).filter_by(housenum=0).all()
+
     for i in range(len(housenum0_record)):
         try:
             with HomesScraper() as bot:
@@ -40,7 +41,7 @@ def test_suumo_scraping():
                 time.sleep(2)
 
         except NoSuchElementException as e:
-            if "totalNum" == e.msg:
+            if "totalNum" in e.msg:
                 continue
             print(e)
             print(traceback.format_exc())
@@ -51,8 +52,8 @@ def test_suumo_scraping():
             print(traceback.format_exc())
             pdb.set_trace()
 
-    return HomesScraper.all_data
+    return HomesScraper.all_data_dict
 
 
 if __name__ == "__main__":
-    test_suumo_scraping()
+    test_homes_scraping()
