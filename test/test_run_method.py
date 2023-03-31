@@ -1,5 +1,6 @@
 import os
 import pdb
+from datetime import date
 
 import pandas as pd
 
@@ -26,7 +27,10 @@ def test_run_method():
             merge_dfs_list.append(df)
 
     merge_df = pd.concat(merge_dfs_list, axis=0)
-    merge_df.to_csv("test_scraping.csv", encoding="utf-8")
+    today = date.today().strftime("%Y%m%d%H%M%S")
+    normalize_merge_csv_name = f"{os.getcwd()}/src/output/{today}_sh.csv"
+
+    merge_df.to_csv(normalize_merge_csv_name, encoding="utf-8")
 
 
 if __name__ == "__main__":
