@@ -4,9 +4,10 @@ import io
 import os
 import shutil
 import traceback
+import zipfile
 
 import pandas as pd
-from fastapi import Depends, FastAPI, File, UploadFile
+from fastapi import Depends, FastAPI, File, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -17,7 +18,7 @@ from model.setting import get_nayose_db
 from process.common.utils import Util
 
 app = FastAPI()
-origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8501/"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -124,6 +125,25 @@ def test_read_nayose_db(db: Session = Depends(get_nayose_db)):
     return housenum0_record
 
 
+@app.get("/read_output_data")
+def read_output_data():
+    """スクレイピングによって作成されたCSVデータをZipに圧縮して出力する"""
+    output_dir_path = f"{os.getcwd()}/src/output"
+    if not os.path.exists(output_dir_path):
+        return {"message": "not exists output data"}
+
+    zip_data = io.BytesIO()
+    with zipfile.ZipFile(zip_data, "w") as zf:
+        for csv_file_path in glob.glob(f"{output_dir_path}/*.csv"):
+            file_name = csv_file_path.split("/")[-1]
+            zf.write(csv_file_path, arcname=file_name)
+
+    response = Response(content=zip_data.getvalue(), media_type="application/zip")
+    response.headers["Content-Disposition"] = 'attachment; filename="csv_files.zip"'
+
+    return response
+
+
 @app.post("/execute_scraping")
 def execute_scraping(
     db: Session = Depends(get_nayose_db), file: UploadFile = File(...)
@@ -163,20 +183,12 @@ def execute_scraping(
                 os.remove(file_path)
 
         # 6. 作成したDFをCSV化して返す
-        csv_file = io.StringIO()
-        normalize_merge_df.to_csv(csv_file, encoding="utf-8")
-
         today = datetime.date.today().strftime("%Y%m%d%H%M%S")
-        normalize_merge_csv_name = f"{os.getcwd()}/src/csv/{today}_sh.csv"
+        normalize_merge_csv_name = f"{os.getcwd()}/src/output/{today}_sh.csv"
 
-        csv_file.seek(0)
-        return StreamingResponse(
-            iter([csv_file.getvalue()]),
-            media_type="text/csv",
-            headers={
-                "Content-Disposition": f"attachment; filename={normalize_merge_csv_name}"
-            },
-        )
+        normalize_merge_df.to_csv(normalize_merge_csv_name, encoding="utf-8")
+
+        return {"message": "実行完了"}
 
     # エラー時に使用したCSVとdbファイルを削除するようにする
     except Exception as e:
