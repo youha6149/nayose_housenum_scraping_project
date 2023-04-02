@@ -18,7 +18,7 @@ if st.button("実行開始"):
     if uploaded_file is not None:
         files = {"file": uploaded_file.getvalue()}
         params = {"file_name": uploaded_file.name.split(".")[0]}
-        headers = ({"accept": "application/json"},)
+        headers = {"accept": "application/json"}
         response = requests.post(
             "http://localhost:8000/execute_scraping",
             params=params,
@@ -45,7 +45,10 @@ if st.button("CSV取得"):
         zip_file = zipfile.ZipFile(io.BytesIO(response.content))
         zip_file.extractall(path=csv_data_path)
 
-        for csv_file in glob.glob(f"{csv_data_path}/*.csv"):
+        csv_file_pathes = [path for path in glob.glob(f"{csv_data_path}/*.csv")]
+        csv_file_pathes.sort(reverse=True)
+
+        for csv_file in csv_file_pathes:
             file_name = csv_file.split("/")[-1]
             with open(csv_file, "rb") as f:
                 csv_data = f.read()
