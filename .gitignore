@@ -11,3 +11,4 @@ build
 csv
 output
 db
+frontend/data/*.csv
