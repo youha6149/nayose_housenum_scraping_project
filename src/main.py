@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.nayose.process import router as nayose_router
+from api.nayose.view import router as nayose_router
 from api.test.api_test import router as tests_router
 
 app = FastAPI()
