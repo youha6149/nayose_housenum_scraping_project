@@ -1,6 +1,6 @@
 import os
 import pdb
-from datetime import date
+from datetime import datetime
 
 import pandas as pd
 
@@ -27,7 +27,7 @@ def test_run_method():
             merge_dfs_list.append(df)
 
     merge_df = pd.concat(merge_dfs_list, axis=0)
-    today = date.today().strftime("%Y%m%d%H%M%S")
+    today = datetime.now().strftime("%Y%m%d%H%M%S")
     normalize_merge_csv_name = f"{os.getcwd()}/src/output/{today}_sh.csv"
 
     merge_df.to_csv(normalize_merge_csv_name, encoding="utf-8")
