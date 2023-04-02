@@ -12,6 +12,11 @@ st.set_page_config(page_title="housenum_scraping")
 
 st.title("housenum_scraping")
 
+st.write(
+    "<style>div.stButton > button:first-child { width: 100%; }</style>",
+    unsafe_allow_html=True,
+)
+
 uploaded_file = st.file_uploader("CSVファイルをアップロードしてください", type="csv")
 
 if st.button("実行開始"):
@@ -50,13 +55,17 @@ if st.button("CSV取得"):
 
         for csv_file in csv_file_pathes:
             file_name = csv_file.split("/")[-1]
+
             with open(csv_file, "rb") as f:
                 csv_data = f.read()
-                st.download_button(
-                    label=file_name,
-                    data=csv_data,
-                    file_name=file_name,
-                    mime="text/csv",
-                )
+
+            st.download_button(
+                label=file_name,
+                data=csv_data,
+                file_name=file_name,
+                mime="text/csv",
+                use_container_width=True,
+            )
+
     else:
         st.error("CSV取得に失敗しました")
