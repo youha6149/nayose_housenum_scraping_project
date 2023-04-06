@@ -47,12 +47,26 @@ class NayoseScraperProcess:
         merge_dfs_list = []
         nayose = Nayose()
         housenum0_record = nayose.read_nayose_data(db, housenum=0)
-        for run_scraper in process.run_functions:
-            scrape_data = run_scraper(housenum0_record)
+        for mod, func in process.run_mod_funcs:
+            if "homes" in func:
+                continue
+
+            run_scraper = getattr(mod, func)
+            scrape_data = run_scraper(
+                housenum0_record=housenum0_record, is_headless=True
+            )
             data = list(scrape_data.values())[0]
+
             if data and not scrape_data == None:
                 df = self.scraper_util.trans_cols_name(scrape_data)
                 merge_dfs_list.append(df)
+
+        # for run_scraper in process.run_functions:
+        #     scrape_data = run_scraper(housenum0_record)
+        #     data = list(scrape_data.values())[0]
+        #     if data and not scrape_data == None:
+        #         df = self.scraper_util.trans_cols_name(scrape_data)
+        #         merge_dfs_list.append(df)
 
         return merge_dfs_list
 
